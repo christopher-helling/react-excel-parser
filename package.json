@@ -1,6 +1,6 @@
 {
   "name": "react-excel-parser",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A react library to render and display excel sheets on webpage",
   "main": "build/index.js",
   "mode": "production",
@@ -27,7 +27,7 @@
     "url": "https://github.com/christopher-helling/react-excel-parser/issues"
   },
   "peerDependencies": {
-    "react": "^16.7.0"
+    "react": "^17.0.2"
   },
   "dependencies": {
     "typescript": "^4.6.4",
