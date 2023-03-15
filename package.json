@@ -21,7 +21,7 @@
     "workbook",
     "table"
   ],
-  "author": "Ashish Deshpande",
+  "author": "Christopher Helling",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/christopher-helling/react-excel-parser/issues"
