@@ -1,6 +1,6 @@
 {
   "name": "react-excel-parser",
-  "version": "0.0.2",
+  "version": "1.0.2",
   "description": "A react library to render and display excel sheets on webpage",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
