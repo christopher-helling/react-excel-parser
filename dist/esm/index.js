@@ -1,2 +1,2 @@
-export { OutTable, ExcelRenderer } from './excelparser';
+export { OutTable, ExcelRenderer, convertExcelRowsToJson, } from './excelparser';
 //# sourceMappingURL=index.js.map

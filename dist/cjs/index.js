@@ -11,8 +11,9 @@ var __createBinding = (this && this.__createBinding) || (Object.create ? (functi
     o[k2] = m[k];
 }));
 exports.__esModule = true;
-exports.ExcelRenderer = exports.OutTable = void 0;
+exports.convertExcelRowsToJson = exports.ExcelRenderer = exports.OutTable = void 0;
 var excelparser_1 = require("./excelparser");
 __createBinding(exports, excelparser_1, "OutTable");
 __createBinding(exports, excelparser_1, "ExcelRenderer");
+__createBinding(exports, excelparser_1, "convertExcelRowsToJson");
 //# sourceMappingURL=index.js.map
