@@ -16,8 +16,10 @@ export type ParsedExcelFile = { rows: any[], cols: { key: number, name?: string 
 const preprocessData = (rows: any[], cols: { key: number, name?: string }[], columnNamesInHeaderRow?: boolean, selectedColumns?: string[]): ParsedExcelFile => {
     const tempCols: { key: number; name?: string }[] = columnNamesInHeaderRow ? rows[0]?.map((c: string, i: number) => ({ name: c, key: i })) : cols;
     const tempRows: any[] = columnNamesInHeaderRow ? rows.slice(1) : rows;
-    // TODO: selectedColumns.includes(c.name) -- make case-insensitive
-    const newColumns = !isEmptyArray(selectedColumns) && selectedColumns.length > 0 ? tempCols.filter((c) => selectedColumns.includes(c?.name || '')) : tempCols;
+    const lowercaseSelectedColumns = selectedColumns?.map((sc) => sc.toLocaleLowerCase());
+    const newColumns = !isEmptyArray(selectedColumns) && selectedColumns.length > 0
+        ? tempCols.filter((c) => lowercaseSelectedColumns.includes(c?.name?.toLocaleLowerCase()))
+        : tempCols;
     const newRows = tempRows.map((r) => newColumns.map((uc) => (r[uc.key]))).filter((nr) => !isEmptyArray(nr));
     return { cols: newColumns.map((c, i) => ({ name: c.name, key: i })), rows: newRows };
 };

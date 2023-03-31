@@ -12,8 +12,10 @@ var preprocessData = function (rows, cols, columnNamesInHeaderRow, selectedColum
     var _a;
     var tempCols = columnNamesInHeaderRow ? (_a = rows[0]) === null || _a === void 0 ? void 0 : _a.map(function (c, i) { return ({ name: c, key: i }); }) : cols;
     var tempRows = columnNamesInHeaderRow ? rows.slice(1) : rows;
-    // TODO: selectedColumns.includes(c.name) -- make case-insensitive
-    var newColumns = !isEmptyArray(selectedColumns) && selectedColumns.length > 0 ? tempCols.filter(function (c) { return selectedColumns.includes((c === null || c === void 0 ? void 0 : c.name) || ''); }) : tempCols;
+    var lowercaseSelectedColumns = selectedColumns === null || selectedColumns === void 0 ? void 0 : selectedColumns.map(function (sc) { return sc.toLocaleLowerCase(); });
+    var newColumns = !isEmptyArray(selectedColumns) && selectedColumns.length > 0
+        ? tempCols.filter(function (c) { var _a; return lowercaseSelectedColumns.includes((_a = c === null || c === void 0 ? void 0 : c.name) === null || _a === void 0 ? void 0 : _a.toLocaleLowerCase()); })
+        : tempCols;
     var newRows = tempRows.map(function (r) { return newColumns.map(function (uc) { return (r[uc.key]); }); }).filter(function (nr) { return !isEmptyArray(nr); });
     return { cols: newColumns.map(function (c, i) { return ({ name: c.name, key: i }); }), rows: newRows };
 };

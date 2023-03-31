@@ -12,7 +12,7 @@ There are two primary components, `ExcelRenderer` and `OutTable`. **ExcelRendere
 ## Documentation
 ### ExcelRenderer(file: File, callback: any)
 
-`file` here is self-explanatory, a file that can be uploaded from an `<input type="file">`. The `callback` passed will fire after the Excel file has been processed. It's currently expecting a function of the form `(error, response) => any` (so a successful call will result in `callback(null, data)`, but I think I will modify this in a future release (I find it weird to specify the error callback first, but I haven't tested the error handling at all).
+`file` here is self-explanatory, a file that can be uploaded from an `<input type="file">`. The `callback` passed will fire after the Excel file has been processed. It's currently expecting a function of the form `(error, response) => any` (so a successful call will result in `callback(null, data)`), but I think I will modify this in a future release (I find it weird to specify the error callback first, but I haven't tested the error handling at all).
 
 ### OutTable(props: IOutTableProps)
 
