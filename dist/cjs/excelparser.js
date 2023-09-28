@@ -58,7 +58,7 @@ function ExcelRenderer(file, callback) {
             var _a;
             /* Parse data */
             var bstr = (_a = e.target) === null || _a === void 0 ? void 0 : _a.result;
-            var wb = XLSX.read(bstr, { type: rABS ? 'binary' : 'array' });
+            var wb = XLSX.read(bstr, { type: rABS ? 'binary' : 'array', cellDates: true });
             /* Get first worksheet */
             var wsname = wb.SheetNames[0];
             var ws = wb.Sheets[wsname];

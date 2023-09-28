@@ -93,7 +93,7 @@ export function ExcelRenderer(file: File, callback: any) {
         reader.onload = (e) => {
             /* Parse data */
             const bstr = e.target?.result;
-            const wb = XLSX.read(bstr, { type: rABS ? 'binary' : 'array' });
+            const wb = XLSX.read(bstr, { type: rABS ? 'binary' : 'array', cellDates: true });
 
             /* Get first worksheet */
             const wsname = wb.SheetNames[0];
