@@ -5,6 +5,7 @@ var tslib_1 = require("tslib");
 var jsx_runtime_1 = require("react/jsx-runtime");
 /* eslint-disable react/no-array-index-key */
 var XLSX = tslib_1.__importStar(require("xlsx"));
+var utils_1 = require("./utils");
 var isNull = function (value) { return value === null || value === undefined; };
 // null, undefined, []
 var isEmptyArray = function (value) { return isNull(value)
@@ -31,6 +32,32 @@ function convertExcelRowsToJson(file, columnNamesInHeaderRow, selectedColumns) {
     })), false)); });
 }
 exports.convertExcelRowsToJson = convertExcelRowsToJson;
+function getCircularReplacer() {
+    var _this = this;
+    var ancestors = [];
+    return function (key, value) {
+        if (typeof value !== 'object' || value === null) {
+            return value;
+        }
+        // `this` is the object that value is contained in,
+        // i.e., its direct parent.
+        while (ancestors.length > 0 && ancestors.at(-1) !== _this) {
+            ancestors.pop();
+        }
+        if (ancestors.includes(value)) {
+            return '[Circular]';
+        }
+        ancestors.push(value);
+        return value;
+    };
+}
+var formatTableEntry = function (value) {
+    if ((0, utils_1.isValidDate)(value))
+        return value.toString();
+    if ((0, utils_1.isObject)(value))
+        return JSON.stringify(value, getCircularReplacer()); // stringify objects even with circular references
+    return value;
+};
 function OutTable(props) {
     var _a, _b;
     var rows = props.rows, columns = props.columns, selectedColumns = props.selectedColumns, _c = props.showRowNumbers, showRowNumbers = _c === void 0 ? false : _c, renderRowNum = props.renderRowNum, _d = props.showHeaderRow, showHeaderRow = _d === void 0 ? true : _d, _e = props.columnNamesInHeaderRow, columnNamesInHeaderRow = _e === void 0 ? true : _e, className = props.className, tableClassName = props.tableClassName, tableHeaderRowClass = props.tableHeaderRowClass;
@@ -38,7 +65,7 @@ function OutTable(props) {
     // TODO: throw error if no columns or rows?
     return ((0, jsx_runtime_1.jsx)("div", tslib_1.__assign({ className: className }, { children: (0, jsx_runtime_1.jsx)("table", tslib_1.__assign({ className: tableClassName }, { children: (0, jsx_runtime_1.jsxs)("tbody", { children: [(0, jsx_runtime_1.jsxs)("tr", { children: [showHeaderRow && showRowNumbers && (0, jsx_runtime_1.jsx)("th", { className: tableHeaderRowClass || '' }), (_a = data.cols) === null || _a === void 0 ? void 0 : _a.map(function (c) { return (0, jsx_runtime_1.jsx)("th", tslib_1.__assign({ className: !isNull(c.key) ? tableHeaderRowClass : '' }, { children: !isNull(c.key) ? c.name : '' }), c.key); })] }), (_b = data.rows) === null || _b === void 0 ? void 0 : _b.map(function (r, i) {
                         var _a;
-                        return ((0, jsx_runtime_1.jsxs)("tr", { children: [showRowNumbers && (0, jsx_runtime_1.jsx)("td", tslib_1.__assign({ className: tableHeaderRowClass }, { children: isFunction(renderRowNum) ? renderRowNum(r, i) : i }), i), (_a = data.cols) === null || _a === void 0 ? void 0 : _a.map(function (c) { return (0, jsx_runtime_1.jsx)("td", { children: r[c.key] }, c.key); })] }, i));
+                        return ((0, jsx_runtime_1.jsxs)("tr", { children: [showRowNumbers && (0, jsx_runtime_1.jsx)("td", tslib_1.__assign({ className: tableHeaderRowClass }, { children: isFunction(renderRowNum) ? renderRowNum(r, i) : i }), i), (_a = data.cols) === null || _a === void 0 ? void 0 : _a.map(function (c) { return (0, jsx_runtime_1.jsx)("td", { children: formatTableEntry(r[c.key]) }, c.key); })] }, i));
                     })] }) })) })));
 }
 exports.OutTable = OutTable;

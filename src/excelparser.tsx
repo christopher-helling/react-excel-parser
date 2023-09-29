@@ -1,5 +1,6 @@
 /* eslint-disable react/no-array-index-key */
 import * as XLSX from 'xlsx';
+import { isObject, isValidDate } from './utils';
 
 const isNull = (value: any): value is null | undefined => value === null || value === undefined;
 
@@ -28,6 +29,31 @@ export function convertExcelRowsToJson(file: ParsedExcelFile, columnNamesInHeade
     const data = preprocessData(file.rows, file.cols, columnNamesInHeaderRow, selectedColumns);
     return data.rows?.map((r: any[]) => Object.assign({}, ...(data.cols.map((c: { name?: string, key: number }) => ({ [removeSpaces(c?.name || '')]: r[c.key] })))));
 }
+
+function getCircularReplacer() {
+    const ancestors = [];
+    return (key, value) => {
+        if (typeof value !== 'object' || value === null) {
+            return value;
+        }
+        // `this` is the object that value is contained in,
+        // i.e., its direct parent.
+        while (ancestors.length > 0 && ancestors.at(-1) !== this) {
+            ancestors.pop();
+        }
+        if (ancestors.includes(value)) {
+            return '[Circular]';
+        }
+        ancestors.push(value);
+        return value;
+    };
+}
+
+const formatTableEntry = (value?: any) => {
+    if (isValidDate(value)) return value.toString();
+    if (isObject(value)) return JSON.stringify(value, getCircularReplacer()); // stringify objects even with circular references
+    return value;
+};
 
 export interface IOutTableProps {
     rows: any[][], // rows are an array of arrays, each row is an array of values (corresponding to a row in the Excel file)
@@ -68,7 +94,7 @@ export function OutTable(props: IOutTableProps) {
                     {data.rows?.map((r, i) => (
                         <tr key={i}>
                             {showRowNumbers && <td key={i} className={tableHeaderRowClass}>{isFunction(renderRowNum) ? renderRowNum(r, i) : i}</td>}
-                            {data.cols?.map((c) => <td key={c.key}>{ r[c.key] }</td>)}
+                            {data.cols?.map((c) => <td key={c.key}>{ formatTableEntry(r[c.key]) }</td>)}
                         </tr>
                     ))}
                 </tbody>

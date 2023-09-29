@@ -2,6 +2,7 @@ import { __assign, __spreadArray } from "tslib";
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 /* eslint-disable react/no-array-index-key */
 import * as XLSX from 'xlsx';
+import { isObject, isValidDate } from './utils';
 var isNull = function (value) { return value === null || value === undefined; };
 // null, undefined, []
 var isEmptyArray = function (value) { return isNull(value)
@@ -27,6 +28,32 @@ export function convertExcelRowsToJson(file, columnNamesInHeaderRow, selectedCol
         return (_a = {}, _a[removeSpaces((c === null || c === void 0 ? void 0 : c.name) || '')] = r[c.key], _a);
     })), false)); });
 }
+function getCircularReplacer() {
+    var _this = this;
+    var ancestors = [];
+    return function (key, value) {
+        if (typeof value !== 'object' || value === null) {
+            return value;
+        }
+        // `this` is the object that value is contained in,
+        // i.e., its direct parent.
+        while (ancestors.length > 0 && ancestors.at(-1) !== _this) {
+            ancestors.pop();
+        }
+        if (ancestors.includes(value)) {
+            return '[Circular]';
+        }
+        ancestors.push(value);
+        return value;
+    };
+}
+var formatTableEntry = function (value) {
+    if (isValidDate(value))
+        return value.toString();
+    if (isObject(value))
+        return JSON.stringify(value, getCircularReplacer()); // stringify objects even with circular references
+    return value;
+};
 export function OutTable(props) {
     var _a, _b;
     var rows = props.rows, columns = props.columns, selectedColumns = props.selectedColumns, _c = props.showRowNumbers, showRowNumbers = _c === void 0 ? false : _c, renderRowNum = props.renderRowNum, _d = props.showHeaderRow, showHeaderRow = _d === void 0 ? true : _d, _e = props.columnNamesInHeaderRow, columnNamesInHeaderRow = _e === void 0 ? true : _e, className = props.className, tableClassName = props.tableClassName, tableHeaderRowClass = props.tableHeaderRowClass;
@@ -34,7 +61,7 @@ export function OutTable(props) {
     // TODO: throw error if no columns or rows?
     return (_jsx("div", __assign({ className: className }, { children: _jsx("table", __assign({ className: tableClassName }, { children: _jsxs("tbody", { children: [_jsxs("tr", { children: [showHeaderRow && showRowNumbers && _jsx("th", { className: tableHeaderRowClass || '' }), (_a = data.cols) === null || _a === void 0 ? void 0 : _a.map(function (c) { return _jsx("th", __assign({ className: !isNull(c.key) ? tableHeaderRowClass : '' }, { children: !isNull(c.key) ? c.name : '' }), c.key); })] }), (_b = data.rows) === null || _b === void 0 ? void 0 : _b.map(function (r, i) {
                         var _a;
-                        return (_jsxs("tr", { children: [showRowNumbers && _jsx("td", __assign({ className: tableHeaderRowClass }, { children: isFunction(renderRowNum) ? renderRowNum(r, i) : i }), i), (_a = data.cols) === null || _a === void 0 ? void 0 : _a.map(function (c) { return _jsx("td", { children: r[c.key] }, c.key); })] }, i));
+                        return (_jsxs("tr", { children: [showRowNumbers && _jsx("td", __assign({ className: tableHeaderRowClass }, { children: isFunction(renderRowNum) ? renderRowNum(r, i) : i }), i), (_a = data.cols) === null || _a === void 0 ? void 0 : _a.map(function (c) { return _jsx("td", { children: formatTableEntry(r[c.key]) }, c.key); })] }, i));
                     })] }) })) })));
 }
 function makeCols(refstr) {

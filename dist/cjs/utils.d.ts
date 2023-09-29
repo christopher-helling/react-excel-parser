@@ -1,0 +1,10 @@
+export declare const isBoolean: (value: any) => value is boolean;
+export declare const isNumber: (value: any) => value is number;
+export declare const isFunction: (value: any) => value is Function;
+export declare const isObject: (value: any) => value is Object;
+export declare const isNull: (value: any) => value is null;
+export declare const isEmptyArray: (value: unknown[] | null | undefined) => value is [];
+export declare const isValidDate: (value: any) => value is Date;
+export declare const isEmptyObject: (value: any) => value is Record<PropertyKey, never>;
+export declare const isNullOrEmpty: (value: any) => value is "" | [] | Record<PropertyKey, never>;
+export declare const isNullOrWhitespace: (value: any) => value is "" | [] | Record<PropertyKey, never>;
