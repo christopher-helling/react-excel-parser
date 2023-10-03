@@ -15,7 +15,7 @@ var preprocessData = function (rows, cols, columnNamesInHeaderRow, selectedColum
     var outputCols = newColumns.map(function (nc) { return ({
         name: nc.name,
         key: nc.key,
-        formatter: isFunction(columnFormatter[nc.name]) ? columnFormatter[nc.name] : function (arg) { return arg; }
+        formatter: isFunction(columnFormatter === null || columnFormatter === void 0 ? void 0 : columnFormatter[nc.name]) ? columnFormatter[nc.name] : function (arg) { return arg; }
     }); });
     var newRows = tempRows.map(function (r) { return outputCols.map(function (uc) { return (uc.formatter(r[uc.key])); }); }).filter(function (nr) { return !isEmptyArray(nr); });
     return { cols: outputCols.map(function (c, i) { return ({ name: c.name, key: i }); }), rows: newRows };

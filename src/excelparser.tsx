@@ -24,7 +24,7 @@ const preprocessData = (
     const outputCols = newColumns.map((nc) => ({
         name: nc.name,
         key: nc.key,
-        formatter: isFunction(columnFormatter[nc.name]) ? columnFormatter[nc.name] : (arg: any) => arg,
+        formatter: isFunction(columnFormatter?.[nc.name]) ? columnFormatter[nc.name] : (arg: any) => arg,
     }));
     const newRows = tempRows.map((r) => outputCols.map((uc) => (uc.formatter(r[uc.key])))).filter((nr) => !isEmptyArray(nr));
     return { cols: outputCols.map((c, i) => ({ name: c.name, key: i })), rows: newRows };
