@@ -15,7 +15,7 @@ const preprocessData = (
     selectedColumns?: string[],
     columnFormatter?: { [key: string]: (arg: any) => any }, // object key should match selected column, { selectedColumn: formattingFunction }
 ): ParsedExcelFile => {
-    const tempCols: { key: number; name?: string }[] = columnNamesInHeaderRow ? rows[0]?.map((c: string, i: number) => ({ name: c, key: i })) : cols;
+    const tempCols: { key: number, name?: string }[] = columnNamesInHeaderRow ? rows[0]?.map((c: string, i: number) => ({ name: c, key: i })) : cols;
     const tempRows: any[] = columnNamesInHeaderRow ? rows.slice(1) : rows;
     const lowercaseSelectedColumns = selectedColumns?.map((sc) => sc.toLocaleLowerCase());
     const newColumns = !isEmptyArray(selectedColumns) && selectedColumns.length > 0
@@ -68,19 +68,19 @@ const formatTableEntry = (value?: any) => {
 export interface IOutTableProps {
     rows: any[][], // rows are an array of arrays, each row is an array of values (corresponding to a row in the Excel file)
     columns: {
-        key: number;
-        name?: string;
+        key: number,
+        name?: string,
     }[],
     // data?: any[], // assume data is a json object that needs to be converted to rows and columns
-    selectedColumns?: string[]; // specify columns you want printed to screen, default to All
-    columnFormatter?: { [key: string]: (arg: any) => any };
-    showRowNumbers?: boolean;
-    renderRowNum?: (row: any, index: number) => string;
-    showHeaderRow?: boolean;
-    columnNamesInHeaderRow?: boolean;
-    className?: string;
-    tableClassName?: string;
-    tableHeaderRowClass: string;
+    selectedColumns?: string[], // specify columns you want printed to screen, default to All
+    columnFormatter?: { [key: string]: (arg: any) => any },
+    showRowNumbers?: boolean,
+    renderRowNum?: (row: any, index: number) => string,
+    showHeaderRow?: boolean,
+    columnNamesInHeaderRow?: boolean,
+    className?: string,
+    tableClassName?: string,
+    tableHeaderRowClass: string,
 }
 
 export function OutTable(props: IOutTableProps) {

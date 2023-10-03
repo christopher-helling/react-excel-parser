@@ -98,6 +98,16 @@ module.exports = {
                 'import/export': 0,
                 'no-shadow': 'off',
                 '@typescript-eslint/no-shadow': ['error'],
+                '@typescript-eslint/member-delimiter-style': ['error', {
+                    multiline: {
+                        delimiter: 'comma',
+                        requireLast: true,
+                    },
+                    singleline: {
+                        delimiter: 'comma',
+                        requireLast: false,
+                    },
+                }],
             },
         },
     ],

@@ -6,26 +6,26 @@ var jsx_runtime_1 = require("react/jsx-runtime");
 /* eslint-disable react/no-array-index-key */
 var XLSX = tslib_1.__importStar(require("xlsx"));
 var utils_1 = require("./utils");
-var isNull = function (value) { return value === null || value === undefined; };
-// null, undefined, []
-var isEmptyArray = function (value) { return isNull(value)
-    || (Array.isArray(value) && (value === null || value === void 0 ? void 0 : value.length) === 0); };
-var isFunction = function (value) { return typeof value === 'function'; };
 var removeSpaces = function (str) { return str.replace(/\s+/g, ''); };
-var preprocessData = function (rows, cols, columnNamesInHeaderRow, selectedColumns) {
+var preprocessData = function (rows, cols, columnNamesInHeaderRow, selectedColumns, columnFormatter) {
     var _a;
     var tempCols = columnNamesInHeaderRow ? (_a = rows[0]) === null || _a === void 0 ? void 0 : _a.map(function (c, i) { return ({ name: c, key: i }); }) : cols;
     var tempRows = columnNamesInHeaderRow ? rows.slice(1) : rows;
     var lowercaseSelectedColumns = selectedColumns === null || selectedColumns === void 0 ? void 0 : selectedColumns.map(function (sc) { return sc.toLocaleLowerCase(); });
-    var newColumns = !isEmptyArray(selectedColumns) && selectedColumns.length > 0
-        ? tempCols.filter(function (c) { var _a; return lowercaseSelectedColumns.includes((_a = c === null || c === void 0 ? void 0 : c.name) === null || _a === void 0 ? void 0 : _a.toLocaleLowerCase()); })
+    var newColumns = !(0, utils_1.isEmptyArray)(selectedColumns) && selectedColumns.length > 0
+        ? tempCols.filter(function (c) { var _a; return lowercaseSelectedColumns.includes((_a = c === null || c === void 0 ? void 0 : c.name) === null || _a === void 0 ? void 0 : _a.toLocaleLowerCase()); }) // TODO: match also on removed spaces?
         : tempCols;
-    var newRows = tempRows.map(function (r) { return newColumns.map(function (uc) { return (r[uc.key]); }); }).filter(function (nr) { return !isEmptyArray(nr); });
-    return { cols: newColumns.map(function (c, i) { return ({ name: c.name, key: i }); }), rows: newRows };
+    var outputCols = newColumns.map(function (nc) { return ({
+        name: nc.name,
+        key: nc.key,
+        formatter: (0, utils_1.isFunction)(columnFormatter[nc.name]) ? columnFormatter[nc.name] : function (arg) { return arg; }
+    }); });
+    var newRows = tempRows.map(function (r) { return outputCols.map(function (uc) { return (uc.formatter(r[uc.key])); }); }).filter(function (nr) { return !(0, utils_1.isEmptyArray)(nr); });
+    return { cols: outputCols.map(function (c, i) { return ({ name: c.name, key: i }); }), rows: newRows };
 };
-function convertExcelRowsToJson(file, columnNamesInHeaderRow, selectedColumns) {
+function convertExcelRowsToJson(file, columnNamesInHeaderRow, selectedColumns, columnFormatter) {
     var _a;
-    var data = preprocessData(file.rows, file.cols, columnNamesInHeaderRow, selectedColumns);
+    var data = preprocessData(file.rows, file.cols, columnNamesInHeaderRow, selectedColumns, columnFormatter);
     return (_a = data.rows) === null || _a === void 0 ? void 0 : _a.map(function (r) { return Object.assign.apply(Object, tslib_1.__spreadArray([{}], (data.cols.map(function (c) {
         var _a;
         return (_a = {}, _a[removeSpaces((c === null || c === void 0 ? void 0 : c.name) || '')] = r[c.key], _a);
@@ -60,12 +60,12 @@ var formatTableEntry = function (value) {
 };
 function OutTable(props) {
     var _a, _b;
-    var rows = props.rows, columns = props.columns, selectedColumns = props.selectedColumns, _c = props.showRowNumbers, showRowNumbers = _c === void 0 ? false : _c, renderRowNum = props.renderRowNum, _d = props.showHeaderRow, showHeaderRow = _d === void 0 ? true : _d, _e = props.columnNamesInHeaderRow, columnNamesInHeaderRow = _e === void 0 ? true : _e, className = props.className, tableClassName = props.tableClassName, tableHeaderRowClass = props.tableHeaderRowClass;
-    var data = preprocessData(rows, columns, columnNamesInHeaderRow, selectedColumns);
+    var rows = props.rows, columns = props.columns, selectedColumns = props.selectedColumns, columnFormatter = props.columnFormatter, _c = props.showRowNumbers, showRowNumbers = _c === void 0 ? false : _c, renderRowNum = props.renderRowNum, _d = props.showHeaderRow, showHeaderRow = _d === void 0 ? true : _d, _e = props.columnNamesInHeaderRow, columnNamesInHeaderRow = _e === void 0 ? true : _e, className = props.className, tableClassName = props.tableClassName, tableHeaderRowClass = props.tableHeaderRowClass;
+    var data = preprocessData(rows, columns, columnNamesInHeaderRow, selectedColumns, columnFormatter);
     // TODO: throw error if no columns or rows?
-    return ((0, jsx_runtime_1.jsx)("div", tslib_1.__assign({ className: className }, { children: (0, jsx_runtime_1.jsx)("table", tslib_1.__assign({ className: tableClassName }, { children: (0, jsx_runtime_1.jsxs)("tbody", { children: [(0, jsx_runtime_1.jsxs)("tr", { children: [showHeaderRow && showRowNumbers && (0, jsx_runtime_1.jsx)("th", { className: tableHeaderRowClass || '' }), (_a = data.cols) === null || _a === void 0 ? void 0 : _a.map(function (c) { return (0, jsx_runtime_1.jsx)("th", tslib_1.__assign({ className: !isNull(c.key) ? tableHeaderRowClass : '' }, { children: !isNull(c.key) ? c.name : '' }), c.key); })] }), (_b = data.rows) === null || _b === void 0 ? void 0 : _b.map(function (r, i) {
+    return ((0, jsx_runtime_1.jsx)("div", tslib_1.__assign({ className: className }, { children: (0, jsx_runtime_1.jsx)("table", tslib_1.__assign({ className: tableClassName }, { children: (0, jsx_runtime_1.jsxs)("tbody", { children: [(0, jsx_runtime_1.jsxs)("tr", { children: [showHeaderRow && showRowNumbers && (0, jsx_runtime_1.jsx)("th", { className: tableHeaderRowClass || '' }), (_a = data.cols) === null || _a === void 0 ? void 0 : _a.map(function (c) { return (0, jsx_runtime_1.jsx)("th", tslib_1.__assign({ className: !(0, utils_1.isNull)(c.key) ? tableHeaderRowClass : '' }, { children: !(0, utils_1.isNull)(c.key) ? c.name : '' }), c.key); })] }), (_b = data.rows) === null || _b === void 0 ? void 0 : _b.map(function (r, i) {
                         var _a;
-                        return ((0, jsx_runtime_1.jsxs)("tr", { children: [showRowNumbers && (0, jsx_runtime_1.jsx)("td", tslib_1.__assign({ className: tableHeaderRowClass }, { children: isFunction(renderRowNum) ? renderRowNum(r, i) : i }), i), (_a = data.cols) === null || _a === void 0 ? void 0 : _a.map(function (c) { return (0, jsx_runtime_1.jsx)("td", { children: formatTableEntry(r[c.key]) }, c.key); })] }, i));
+                        return ((0, jsx_runtime_1.jsxs)("tr", { children: [showRowNumbers && (0, jsx_runtime_1.jsx)("td", tslib_1.__assign({ className: tableHeaderRowClass }, { children: (0, utils_1.isFunction)(renderRowNum) ? renderRowNum(r, i) : i }), i), (_a = data.cols) === null || _a === void 0 ? void 0 : _a.map(function (c) { return (0, jsx_runtime_1.jsx)("td", { children: formatTableEntry(r[c.key]) }, c.key); })] }, i));
                     })] }) })) })));
 }
 exports.OutTable = OutTable;
