@@ -1,32 +1,42 @@
 /* eslint-disable react/no-array-index-key */
 import * as XLSX from 'xlsx';
-import { isObject, isValidDate } from './utils';
-
-const isNull = (value: any): value is null | undefined => value === null || value === undefined;
-
-// null, undefined, []
-const isEmptyArray = (value: unknown[] | null | undefined): value is null | undefined | [] => isNull(value)
-|| (Array.isArray(value) && value?.length === 0);
-
-const isFunction = (value: any) : value is Function => typeof value === 'function';
+import {
+    isEmptyArray, isFunction, isNull, isObject, isValidDate,
+} from './utils';
 
 const removeSpaces = (str: string) => str.replace(/\s+/g, '');
 
 export type ParsedExcelFile = { rows: any[], cols: { key: number, name?: string }[] };
 
-const preprocessData = (rows: any[], cols: { key: number, name?: string }[], columnNamesInHeaderRow?: boolean, selectedColumns?: string[]): ParsedExcelFile => {
+const preprocessData = (
+    rows: any[],
+    cols: { key: number, name?: string }[],
+    columnNamesInHeaderRow?: boolean,
+    selectedColumns?: string[],
+    columnFormatter?: { [key: string]: (arg: any) => any }, // object key should match selected column, { selectedColumn: formattingFunction }
+): ParsedExcelFile => {
     const tempCols: { key: number; name?: string }[] = columnNamesInHeaderRow ? rows[0]?.map((c: string, i: number) => ({ name: c, key: i })) : cols;
     const tempRows: any[] = columnNamesInHeaderRow ? rows.slice(1) : rows;
     const lowercaseSelectedColumns = selectedColumns?.map((sc) => sc.toLocaleLowerCase());
     const newColumns = !isEmptyArray(selectedColumns) && selectedColumns.length > 0
-        ? tempCols.filter((c) => lowercaseSelectedColumns.includes(c?.name?.toLocaleLowerCase()))
+        ? tempCols.filter((c) => lowercaseSelectedColumns.includes(c?.name?.toLocaleLowerCase())) // TODO: match also on removed spaces?
         : tempCols;
-    const newRows = tempRows.map((r) => newColumns.map((uc) => (r[uc.key]))).filter((nr) => !isEmptyArray(nr));
-    return { cols: newColumns.map((c, i) => ({ name: c.name, key: i })), rows: newRows };
+    const outputCols = newColumns.map((nc) => ({
+        name: nc.name,
+        key: nc.key,
+        formatter: isFunction(columnFormatter[nc.name]) ? columnFormatter[nc.name] : (arg: any) => arg,
+    }));
+    const newRows = tempRows.map((r) => outputCols.map((uc) => (uc.formatter(r[uc.key])))).filter((nr) => !isEmptyArray(nr));
+    return { cols: outputCols.map((c, i) => ({ name: c.name, key: i })), rows: newRows };
 };
 
-export function convertExcelRowsToJson(file: ParsedExcelFile, columnNamesInHeaderRow?: boolean, selectedColumns?: string[]) {
-    const data = preprocessData(file.rows, file.cols, columnNamesInHeaderRow, selectedColumns);
+export function convertExcelRowsToJson(
+    file: ParsedExcelFile,
+    columnNamesInHeaderRow?: boolean,
+    selectedColumns?: string[],
+    columnFormatter?: { [key: string]: (arg: any) => any },
+) {
+    const data = preprocessData(file.rows, file.cols, columnNamesInHeaderRow, selectedColumns, columnFormatter);
     return data.rows?.map((r: any[]) => Object.assign({}, ...(data.cols.map((c: { name?: string, key: number }) => ({ [removeSpaces(c?.name || '')]: r[c.key] })))));
 }
 
@@ -63,6 +73,7 @@ export interface IOutTableProps {
     }[],
     // data?: any[], // assume data is a json object that needs to be converted to rows and columns
     selectedColumns?: string[]; // specify columns you want printed to screen, default to All
+    columnFormatter?: { [key: string]: (arg: any) => any };
     showRowNumbers?: boolean;
     renderRowNum?: (row: any, index: number) => string;
     showHeaderRow?: boolean;
@@ -74,11 +85,11 @@ export interface IOutTableProps {
 
 export function OutTable(props: IOutTableProps) {
     const {
-        rows, columns, selectedColumns, showRowNumbers = false, renderRowNum, showHeaderRow = true, columnNamesInHeaderRow = true,
+        rows, columns, selectedColumns, columnFormatter, showRowNumbers = false, renderRowNum, showHeaderRow = true, columnNamesInHeaderRow = true,
         className, tableClassName, tableHeaderRowClass,
     } = props;
 
-    const data = preprocessData(rows, columns, columnNamesInHeaderRow, selectedColumns);
+    const data = preprocessData(rows, columns, columnNamesInHeaderRow, selectedColumns, columnFormatter);
     // TODO: throw error if no columns or rows?
 
     return (
