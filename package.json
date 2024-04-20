@@ -1,6 +1,6 @@
 {
   "name": "react-excel-parser",
-  "version": "1.0.9-delta",
+  "version": "1.0.10",
   "description": "A react library to render and display excel sheets on webpage",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -40,7 +40,7 @@
     "react": "^17.0.2"
   },
   "dependencies": {
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz",
     "tslib": "^2.6.2"
   },
   "devDependencies": {
